@@ -44,7 +44,6 @@ def plot_1():
     print(df1)
     plot1.plot(df1['Close'])
     plot1.grid()
-    # plot1.plot(df.index, df['BTC-USD'])
     # creating the Tkinter canvas containing the Matplotlib figure
     plot1.set_title(f'Close price for the chosen coin and period ({coin})')
 
@@ -57,12 +56,8 @@ def plot_1():
     toolbar.update()
     # placing the toolbar on the Tkinter window
     canvas.get_tk_widget().pack()
-    # toolbar.destroy()
-    # button_1['state'] = "disabled"
-    # clear(canvas=canvas)
-    # canvas.delete("all")
-    # canvas.get_tk_widget().pack_forget()
 
+    
 def plot_2():
     try:
         global canvas
@@ -151,26 +146,16 @@ def plot_4():
     # plotting the graph
     idx = pd.IndexSlice
     df1 = df.loc[:, idx[coin, :]]
-    #df1 = df1[input_date1:input_date2]
     df1.columns = df1.columns.droplevel(0)
     df1 = df1.drop('Adj Close', axis=1)
     preprocess_1(df1)
-    y_test, pred1, mape, df_importances = lgbm_train(df1, horizon=7)# choose big interval (input dates) for the model to train normally. Enough training data
+    y_test, pred1, mape, df_importances = lgbm_train(df1, horizon=7)
     print(y_test, pred1)
     t1, = plot1.plot(y_test, color='red')
     t2, = plot1.plot(pred1, color='green')
     fig.legend((t1,t2), ('Real','Prediction'), 'upper left')
     plot1.set_title(f'Real vs Prediction - MAPE {mape}')
     plot1.grid()
-
-    # from scipy.signal import find_peaks
-    # # x = np.array([6, 3, 5, 2, 1, 4, 9, 7, 8])
-    # # y = np.array([2, 1, 3, 5, 3, 9, 8, 10, 7])
-    # peaks, _ = find_peaks(y)
-    # # this way the x-axis corresponds to the index of x
-    # plt.plot(x - 1, y)
-    # plt.plot(peaks, y[peaks], "x")
-    # plt.show()
 
     canvas = FigureCanvasTkAgg(fig, master=sheet4)
     canvas.get_tk_widget().pack()
@@ -233,9 +218,6 @@ def plot_6():
     df1 = preprocess_1(df1)
     global df2
     df2 = lgbm_train_forecast(df1, input_date=input_date3)
-    #df1 = train_forecast1(df1)
-
-    # results.plot(title='BTC')
     plot1.plot(df2.index, df2['pred'])
     plot1.grid()
     plot1.set_title(f'{input_date3}-day Forecast by LightGBM')
@@ -249,7 +231,7 @@ def plot_6():
     return df1, df2
 
 
-def pack_profit_2(): #we have two dfs accessible now. Need to concate4nate them to get today's coin price.
+def pack_profit_2(): 
     from datetime import datetime, timedelta
     global df1
     today_1 = datetime.today().strftime('%Y-%m-%d')
@@ -284,12 +266,7 @@ def plot_7():
     df1 = df1.drop('Adj Close', axis=1)
     df1 = preprocess_1(df1)
 
-    #df1 = train_time_series_with_folds_2(df1)
     df1 = train_forecast1(df1)
-    #input_days = 7
-    # global p
-    # p = get_profit(df1, input_date3)
-    # print(p)
     plot1.plot(df1.index, df1['Forecast'])
     plot1.grid()
     plot1.set_title(f'30-day forecast by LSTM ({coin})')
@@ -300,7 +277,7 @@ def plot_7():
     toolbar = NavigationToolbar2Tk(canvas, sheet7)
     toolbar.update()
     canvas.get_tk_widget().pack()
-    return df1 #, p # was without p
+    return df1
 
 
 def pack_profit():
@@ -319,9 +296,6 @@ def search_df(*event):
     except NameError:
         pass
     pd.set_option('display.max_colwidth', 100)
-    #df = pd.read_csv("results_2", index_col=False)
-    # df_rss = get_df_RSS()
-    # print(df_rss)
     search_result=df_rss.loc[df_rss['Title'].str.contains(e1_value.get(),
                                na=False, #ignore the cell's value is Nan
                                case=False)] #case insensitive
@@ -335,7 +309,7 @@ def search_df(*event):
 
 
 def callback(selection):
-    global coin  # we have global coin, input_date1 and input_date2 ready to use in all sheets
+    global coin 
     coin = selection
     print(coin)
     return coin
@@ -356,15 +330,12 @@ def callback_date2():
 
 
 def callback_date3(selection):
-    global input_date3  # we have global coin, input_date1 and input_date2 ready to use in all sheets
+    global input_date3 
     input_date3 = int(selection)
     print(input_date3)
     return input_date3
 
 
-# open, close, high, low are highly correlated so we dont use them all. only close
-# light GBM is faster than LSTM so we use it. cause we need to retrain model in real time
-# do scaling and random search for hyperparameter tuning, maybe with RF do ensemble
 
 """Create Window"""
 window = tkr.Tk()
@@ -465,8 +436,6 @@ button_7.pack()
 
 tab6_label = tkr.Label(sheet6, text="Welcome to Sheet6 \n Press button to predict the price \n for the selected number of days. \n\n Select number of days to forecast: ")
 tab6_label.pack()
-# date3 = tkr.Entry(sheet6) # unknown option "-command" for entries (also DateEntries)
-# date3.pack(padx=10, pady=10)
 list1 = list(np.arange(2, 31))
 coin_symbols=[]
 for i in list1:
